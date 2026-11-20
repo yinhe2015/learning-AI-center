@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex 工作台</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <main id="auth" class="auth-page">
+    <section class="auth-card" aria-labelledby="auth-title">
+      <div class="brand-mark" aria-hidden="true">›_</div>
+      <h1 id="auth-title">Codex 工作台</h1>
+      <p class="muted">登录以打开你的本机项目。</p>
+      <div class="tabs" aria-label="账户">
+        <button type="button" id="login-tab" aria-pressed="true">登录</button>
+        <button type="button" id="register-tab" aria-pressed="false">注册</button>
+      </div>
+      <form id="auth-form">
+        <label>用户名<input name="name" required minlength="3" maxlength="32" autocomplete="username" autocapitalize="none"></label>
+        <label>密码<input name="password" type="password" required minlength="8" maxlength="128" autocomplete="current-password"></label>
+        <p class="error" id="auth-error" role="alert"></p>
+        <button class="primary wide" id="auth-submit" type="submit">登录</button>
+      </form>
+    </section>
+  </main>
+
+  <main id="workbench" class="workbench" hidden>
+    <aside class="sidebar" aria-label="项目和会话">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">›_</span><span>Codex 工作台</span></div>
+      <div class="section-heading"><h2>项目</h2><button id="new-project" type="button" class="icon-button" aria-label="创建项目" title="创建项目">＋</button></div>
+      <nav id="projects" class="nav-list" aria-label="项目"></nav>
+      <div class="section-heading"><h2>会话</h2><button id="new-chat" type="button" class="icon-button" aria-label="新建会话" title="新建会话" disabled>＋</button></div>
+      <nav id="chats" class="nav-list chat-list" aria-label="会话"></nav>
+      <div class="account"><span id="avatar" class="avatar" aria-hidden="true"></span><span id="username"></span><button id="logout" type="button" class="text-button">退出</button></div>
+    </aside>
+
+    <section class="main-panel" aria-label="工作区">
+      <header class="topbar">
+        <div class="context"><span id="project-name" class="muted">工作区</span><span id="chat-name"></span></div>
+        <div class="project-actions">
+          <button id="preview-project" type="button" class="secondary" disabled>项目预览</button>
+          <button id="files-toggle" type="button" class="secondary" aria-pressed="false" disabled>项目文件</button>
+        </div>
+      </header>
+      <div id="workspace-grid" class="workspace-grid">
+        <section class="conversation" aria-label="Codex 对话">
+          <div class="timeline" id="timeline" tabindex="0">
+            <div class="empty" id="empty">
+              <div class="brand-mark empty-mark" aria-hidden="true">›_</div>
+              <h1 id="empty-title">创建第一个项目</h1>
+              <p id="empty-description">每个项目都有自己的目录和 Codex 会话。</p>
+              <button id="empty-action" class="primary" type="button">创建项目</button>
+            </div>
+            <div id="messages" class="messages"></div>
+          </div>
+          <div class="composer-area">
+            <div id="questions" class="questions"></div>
+            <p id="chat-error" role="alert" class="error chat-error"></p>
+            <form id="composer" hidden>
+              <div id="attached-files" class="attached-files" aria-label="消息附件" hidden></div>
+              <label class="sr-only" for="message">给 Codex 的消息</label>
+              <textarea id="message" rows="3" maxlength="24000" placeholder="给 Codex 发消息"></textarea>
+              <div class="composer-footer">
+                <button id="attach-files" class="secondary" type="button">添加附件</button>
+                <input id="chat-file-input" type="file" multiple hidden>
+                <label class="plan-option"><input type="checkbox" id="plan"> 规划模式</label>
+                <span id="activity" role="status" class="muted"></span>
+                <button id="stop" class="secondary" type="button" hidden>停止</button>
+                <button id="send" class="primary" type="submit">发送</button>
+              </div>
+            </form>
+          </div>
+        </section>
+        <aside id="files" class="files-panel" aria-label="项目文件" hidden>
+          <div class="files-heading"><h2>项目文件</h2><div><button id="upload-files" type="button" class="text-button">上传</button><button id="refresh-files" type="button" class="text-button">刷新</button></div></div>
+          <input id="project-file-input" type="file" multiple hidden>
+          <p id="upload-status" class="nav-hint" role="status" hidden></p>
+          <div class="file-location"><button id="parent-dir" type="button" class="text-button" hidden>上一级</button><span id="file-path"></span></div>
+          <div id="file-list" class="nav-list"></div>
+          <div id="upload-preview" hidden></div>
+          <pre id="file-preview" hidden></pre>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="project-dialog">
+    <form id="project-form">
+      <h2>创建项目</h2>
+      <label>项目名称<input name="name" required maxlength="60" autofocus></label>
+      <p id="project-error" class="error" role="alert"></p>
+      <div class="dialog-actions"><button id="cancel-project" type="button" class="secondary">取消</button><button class="primary" type="submit">创建</button></div>
+    </form>
+  </dialog>
+  <dialog id="preview-dialog">
+    <form id="preview-form">
+      <h2>项目预览</h2>
+      <p class="muted">局域网模式下，远程设备可通过分配的 HTTPS 端口打开预览。</p>
+      <div id="preview-options">
+        <label>启动方式
+          <select name="mode">
+            <option value="static">静态页面</option>
+            <option value="command">启动 Web 服务</option>
+          </select>
+        </label>
+        <label id="preview-directory">静态目录<input name="directory" placeholder="留空自动查找 index.html" maxlength="256"></label>
+        <label id="preview-command" hidden>启动命令<input name="command" placeholder="例如 npm run dev" maxlength="1500"></label>
+      </div>
+      <p id="preview-status" role="status" class="muted"></p>
+      <p id="preview-error" role="alert" class="error"></p>
+      <div class="dialog-actions">
+        <button type="button" id="close-preview" class="secondary">关闭</button>
+        <button type="button" id="stop-preview" class="secondary" hidden>停止预览</button>
+        <a id="open-preview" class="primary" target="_blank" rel="noopener noreferrer" hidden>打开预览</a>
+        <button id="start-preview" class="primary" type="submit">启动预览</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>
